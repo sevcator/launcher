@@ -1,34 +1,37 @@
-name: .NET Build
+name: Build and Upload Artifact
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
-    
-    - name: Restore dependencies
-      run: dotnet restore
-      
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
-      
-    - name: Publish
-      run: dotnet publish --configuration Release --no-build -p:PublishSingleFile=true -p:SelfContained=false --runtime win-x64
-    
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: launcher
-        path: Launcher/bin/Release/net8.0-windows7.0/win-x64/publish/launcher.exe
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore Wauncher/Wauncher.csproj
+
+      - name: Build
+        run: dotnet build Wauncher/Wauncher.csproj --configuration Release --no-restore
+
+      - name: Publish
+        run: dotnet publish Wauncher/Wauncher.csproj --configuration Release --no-build --runtime win-x64 --self-contained false
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wauncher-win-x64
+          path: Wauncher/bin/Release/net8.0-windows7.0/win-x64/publish/
+          if-no-files-found: error
